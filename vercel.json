@@ -1,0 +1,41 @@
+{
+  "version": 2,
+  "functions": {
+    "api/**/*.php": {
+      "runtime": "vercel-php@0.7.1"
+    },
+    "*.php": {
+      "runtime": "vercel-php@0.7.1"
+    }
+  },
+  "routes": [
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/login",
+      "dest": "/login.php"
+    },
+    {
+      "src": "/logout",
+      "dest": "/logout.php"
+    },
+    {
+      "src": "/install",
+      "dest": "/install.php"
+    },
+    {
+      "src": "/(.*\\.php)",
+      "dest": "/$1"
+    },
+    {
+      "src": "/",
+      "dest": "/index.php"
+    }
+  ]
+}

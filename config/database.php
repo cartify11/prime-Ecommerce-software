@@ -16,12 +16,18 @@ class Database {
             }
         }
 
+        $host = getenv('DB_HOST') ?: ($_ENV['DB_HOST'] ?? '127.0.0.1');
+        $port = getenv('DB_PORT') ?: ($_ENV['DB_PORT'] ?? '3306');
+        $database = getenv('DB_NAME') ?: (getenv('DB_DATABASE') ?: ($_ENV['DB_NAME'] ?? ($_ENV['DB_DATABASE'] ?? 'prime_hub')));
+        $username = getenv('DB_USER') ?: (getenv('DB_USERNAME') ?: ($_ENV['DB_USER'] ?? ($_ENV['DB_USERNAME'] ?? 'root')));
+        $password = getenv('DB_PASS') !== false ? getenv('DB_PASS') : (getenv('DB_PASSWORD') !== false ? getenv('DB_PASSWORD') : ($_ENV['DB_PASS'] ?? ($_ENV['DB_PASSWORD'] ?? '')));
+
         return [
-            'host'     => getenv('DB_HOST') ?: '127.0.0.1',
-            'port'     => getenv('DB_PORT') ?: '3306',
-            'database' => getenv('DB_NAME') ?: 'prime_hub',
-            'username' => getenv('DB_USER') ?: 'root',
-            'password' => getenv('DB_PASS') !== false ? getenv('DB_PASS') : '',
+            'host'     => $host,
+            'port'     => $port,
+            'database' => $database,
+            'username' => $username,
+            'password' => $password,
             'charset'  => 'utf8mb4'
         ];
     }
@@ -38,12 +44,16 @@ class Database {
                 PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES {$config['charset']} COLLATE utf8mb4_unicode_ci"
             ];
 
+            // Cloud DB SSL Support (e.g. Aiven, TiDB, PlanetScale)
+            if (getenv('DB_SSL') === 'true' || getenv('DB_SSL_MODE') === 'REQUIRED') {
+                $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+            }
+
             try {
                 self::$instance = new PDO($dsn, $config['username'], $config['password'], $options);
             } catch (PDOException $e) {
-                // Production safe error logging - never expose raw DB credentials to user
                 error_log("Database Connection Error: " . $e->getMessage());
-                throw new Exception("Unable to connect to the database. Please verify database configuration.");
+                throw new Exception("Unable to connect to the database. Error: " . $e->getMessage());
             }
         }
 
