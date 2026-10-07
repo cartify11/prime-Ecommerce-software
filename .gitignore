@@ -1,0 +1,39 @@
+# Large Electron Desktop Binaries & Runtime (Prevents GitHub 100MB rejection)
+prime-ecommerce-hub.exe
+*.dll
+*.pak
+*.bin
+*.dat
+vk_swiftshader_icd.json
+LICENSES.chromium.html
+LICENSE.electron.txt
+locales/
+resources/
+extracted_app/
+
+# Deployment Zips
+*.zip
+
+# Sensitive Local Database Config
+config/db_config.php
+
+# Storage & Temporary Files
+storage/backups/*
+!storage/backups/.gitkeep
+storage/logs/*
+!storage/logs/.gitkeep
+storage/exports/*
+!storage/exports/.gitkeep
+
+# Test scripts
+test_suite.php
+test_http.php
+test_migration.php
+test_cookie.txt
+
+# OS & Editor Files
+.DS_Store
+Thumbs.db
+node_modules/
+.vscode/
+.idea/
