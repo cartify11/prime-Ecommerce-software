@@ -4,6 +4,13 @@
  * Handles routing for root scripts and dynamic requests on Vercel
  */
 
+// Global Base URL detection for Vercel
+if (!defined('BASE_URL')) {
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    define('BASE_URL', "{$protocol}://{$host}");
+}
+
 $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
 $path = parse_url($requestUri, PHP_URL_PATH);
 $path = urldecode($path);
@@ -29,12 +36,16 @@ if ($cleanRoute === 'install' || $cleanRoute === 'install.php') {
     exit;
 }
 
-// 3. API endpoint routing
-$targetFile = realpath(__DIR__ . '/../' . $cleanRoute);
-$rootDir = realpath(__DIR__ . '/../');
+// 3. API & Dynamic script routing
+$targetFile = __DIR__ . '/../' . $cleanRoute;
 
-// Security check: ensure target stays inside project root
-if ($targetFile && strpos($targetFile, $rootDir) === 0 && file_exists($targetFile) && !is_dir($targetFile)) {
+// Avoid self-inclusion loop
+if (realpath($targetFile) === realpath(__FILE__)) {
+    require __DIR__ . '/../index.php';
+    exit;
+}
+
+if (file_exists($targetFile) && !is_dir($targetFile)) {
     $ext = pathinfo($targetFile, PATHINFO_EXTENSION);
     if ($ext === 'php') {
         require $targetFile;
@@ -58,10 +69,10 @@ if ($targetFile && strpos($targetFile, $rootDir) === 0 && file_exists($targetFil
 }
 
 // Check with .php extension appended
-if (file_exists(__DIR__ . '/../' . $cleanRoute . '.php')) {
-    require __DIR__ . '/../' . $cleanRoute . '.php';
+if (file_exists($targetFile . '.php')) {
+    require $targetFile . '.php';
     exit;
 }
 
-// Default fallback
+// Default fallback to index.php
 require __DIR__ . '/../index.php';
